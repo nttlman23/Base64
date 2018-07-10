@@ -85,10 +85,11 @@ char *_stringncpy(char *dest, std::string &src, size_t n)
     return dest;
 }
 
-int read_from_stdin(char *buffer)
+char *read_from_stdin(int &data_size)
 {
-    std::string data_str;
-    int data_size = 0;
+    std::string data_str;    
+    char *buffer = NULL;
+    data_size = 0;
     
     fprintf(stdout, "Source string (Ctrl+D - stop):\n");
     
@@ -108,15 +109,18 @@ int read_from_stdin(char *buffer)
     
     std::cout << "data_str: " << data_str << std::endl;
     
-    if (data_str.length())
+    data_size = data_str.length();
+    
+    std::cout << "data size: " << data_size << std::endl;
+    
+    if (data_size)
     {
-        data_size = data_str.length();
         buffer = new char[data_size];
         memset(buffer, 0, data_size);
-        _stringncpy(buffer, data_str, data_size);
+        strncpy(buffer, data_str.c_str(), data_size);
     }
     
-    return data_size;
+    return buffer;
 }
 
 int main(int argc, char** argv)
@@ -183,7 +187,7 @@ int main(int argc, char** argv)
     
     if (stdin_io)
     {
-        data_size = read_from_stdin(buffer);
+        buffer = read_from_stdin(data_size);
         std::cout << "Data: " << data_size << std::endl;
     }
     else
