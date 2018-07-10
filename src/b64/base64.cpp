@@ -2,6 +2,7 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <assert.h>
 
 // QUJDRA==
 
@@ -24,6 +25,7 @@ void cnvrt628(unsigned char *arr6, unsigned char *arr8)
 
 std::string B64Encode(unsigned char const *data, int dataSize)
 {
+    assert(data);
     std::string result = "";
     unsigned char arr6[4] = { 0 };
     unsigned char arr8[3] = { 0 };
@@ -70,6 +72,7 @@ std::string B64Encode(unsigned char const *data, int dataSize)
 
 std::string B64Decode(unsigned char const *data, int dataSize)
 {
+    assert(data);
     std::string result;
     unsigned char arr6[4] = { 0 };
     unsigned char arr8[3] = { 0 };
