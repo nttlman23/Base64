@@ -7,6 +7,21 @@
 #include <errno.h>
 #include <fstream>
 #include <assert.h>
+#include <unistd.h>
+
+#define LOADING_0           "Loading… ▫▫▫▫▫▫▫▫▫▫ 0%"
+#define LOADING_10          "Loading… ▪▫▫▫▫▫▫▫▫▫ 10%"
+#define LOADING_20          "Loading… ▪▪▫▫▫▫▫▫▫▫ 20%"
+#define LOADING_30          "Loading… ▪▪▪▫▫▫▫▫▫▫ 30%"
+#define LOADING_40          "Loading… ▪▪▪▪▫▫▫▫▫▫ 40%"
+#define LOADING_50          "Loading… ▪▪▪▪▪▫▫▫▫▫ 50%"
+#define LOADING_60          "Loading… ▪▪▪▪▪▪▫▫▫▫ 60%"
+#define LOADING_70          "Loading… ▪▪▪▪▪▪▪▫▫▫ 70%"
+#define LOADING_80          "Loading… ▪▪▪▪▪▪▪▪▫▫ 80%"
+#define LOADING_90          "Loading… ▪▪▪▪▪▪▪▪▪▫ 90%"
+#define LOADING_100         "Loading… ▪▪▪▪▪▪▪▪▪▪ 100%"
+
+#define TIMEOUT             200000
 
 void hexDump(char *desc, void *addr, int len, int offset) 
 {
@@ -107,11 +122,7 @@ char *read_from_stdin(int &data_size)
         data_str += line;
     }
     
-    std::cout << "data_str: " << data_str << std::endl;
-    
     data_size = data_str.length();
-    
-    std::cout << "data size: " << data_size << std::endl;
     
     if (data_size)
     {
@@ -123,8 +134,85 @@ char *read_from_stdin(int &data_size)
     return buffer;
 }
 
+char *read_from_file(std::fstream &in, int &data_size)
+{
+    std::string data_str;    
+    char *buffer = NULL;
+    data_size = 0;
+    
+    in.seekg (0, in.end);
+    data_size = in.tellg();
+    in.seekg (0, in.beg);
+    
+    buffer = new char[data_size];
+    
+    in.read(buffer, data_size);
+    
+    if (in)
+    {
+        std::cout << "all characters read successfully." << std::endl;
+    }
+    else
+    {
+        std::cout << "error: only " << in.gcount() <<
+                                " could be read" << std::endl;
+        delete [] buffer;
+        return NULL;
+    }
+    
+    return buffer;
+}
+
 int main(int argc, char** argv)
 {
+    fprintf(stdout, "%s", LOADING_0);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_10);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_20);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_30);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_40);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_50);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_60);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_70);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_80);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_90);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "%s", LOADING_100);
+    fflush(stdout);
+    usleep(TIMEOUT);
+    fprintf(stdout, "\r");
+    fprintf(stdout, "\n\n( ͡° ͜ʖ ͡°)\n\n");
+    return 0;
+    
+    
     char *buffer = NULL;
     int stdin_io = 1;
     int stdout_io = 1;
@@ -147,7 +235,7 @@ int main(int argc, char** argv)
     int option_index;
     
     while ((res = getopt_long(argc, argv, short_opts, 
-        long_opts, &option_index))!=-1)
+        long_opts, &option_index)) != -1)
     {
         switch(res)
         {
@@ -188,31 +276,11 @@ int main(int argc, char** argv)
     if (stdin_io)
     {
         buffer = read_from_stdin(data_size);
-        std::cout << "Data: " << data_size << std::endl;
     }
     else
     {
-        in.seekg (0, in.end);
-        data_size = in.tellg();
-        in.seekg (0, in.beg);
-        
-        buffer = new char[data_size];
-        
-        in.read(buffer, data_size);
-        
-        if (in)
-        {
-            std::cout << "all characters read successfully.";
-        }
-        else
-        {
-            std::cout << "error: only " << in.gcount() << " could be read";
-            release_res(in, out, buffer);
-            return -1;
-        }
+        buffer = read_from_file(in, data_size);
     }
-    
-    hexDump("Buffer", buffer, data_size, 0);
     
     std::string dest_str;
     
@@ -231,7 +299,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        std::cout << dest_str.c_str() << std::endl;
+        std::cout << std::endl << "Result: " << dest_str.c_str() << std::endl;
     }
     
     release_res(in, out, buffer);

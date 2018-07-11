@@ -8,6 +8,48 @@
 
 static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
+void hexDump(char *desc, void *addr, int len, int offset) 
+{
+    assert(addr);
+    int i;
+    unsigned char buff[17];
+    unsigned char *pc = (unsigned char*)addr;
+    
+    if (desc != NULL)
+    {
+        printf ("%s:\n", desc);
+    }
+    
+    for (i = 0; i < len; i++)
+    {
+        if ((i % 16) == 0)
+        {
+            if (i != 0)
+            {
+                printf("  %s\n", buff);
+            }
+            printf("%08x ", i + (offset * 0x200));
+        }
+        printf(" %02x", pc[i]);
+        if ((pc[i] < 0x20) || (pc[i] > 0x7e))
+        {
+            buff[i % 16] = '.';
+        }
+        else
+        {
+            buff[i % 16] = pc[i];
+        }
+        
+        buff[(i % 16) + 1] = '\0';
+    }
+    while ((i % 16) != 0)
+    {
+        printf("   ");
+        i++;
+    }
+    printf("  %s\n", buff);
+}
+
 void cnvrt826(unsigned char *arr8, unsigned char *arr6)
 {
     arr6[0] = ((arr8[0] & 0xfc) >> 2);
@@ -67,12 +109,14 @@ std::string B64Encode(unsigned char const *data, int dataSize)
             result += '=';
         }
     }
+    
     return result;
 }
 
 std::string B64Decode(unsigned char const *data, int dataSize)
 {
     assert(data);
+    hexDump("data", (void*)data, dataSize, 0);
     std::string result;
     unsigned char arr6[4] = { 0 };
     unsigned char arr8[3] = { 0 };
@@ -80,10 +124,14 @@ std::string B64Decode(unsigned char const *data, int dataSize)
     int j;
     while((dataSize--) && (*data) != '=')
     {
+        if (*data == 0x0a)
+        {
+            data++;
+        }
         arr6[i++] = *(data++);
         
         if (i == 4)
-        {            
+        {
             for ( j = 0; j < 4; j++)
             {
                 arr6[j] = base64_chars.find(arr6[j]);
@@ -114,6 +162,8 @@ std::string B64Decode(unsigned char const *data, int dataSize)
             result += arr8[j];
         }
     }
+    
+    hexDump("result", (void*)result.c_str(), result.length(), 0);
 
     return result;
 }
