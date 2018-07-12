@@ -4,11 +4,35 @@
 #include <iostream>
 #include <assert.h>
 
+#include <base64.h>
+
 // QUJDRA==
 const uint8_t base64_chars[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789+/";
+        
+static void progress_draw(int percentage)
+{
+    int blsq = percentage / 5;
+    int whtsq = 20 - blsq;
+    int i;
+    
+    fprintf(stdout, "\rProcessing ");
+    
+    for (i = 0;i < blsq;i++)
+    {
+        fprintf(stdout, "%s", BLACK_SQUARE);
+    }
+            
+    for (i = 0;i < whtsq;i++)
+    {
+        fprintf(stdout, "%s", WHITE_SQUARE);
+    }
+            
+    fprintf(stdout, " %d%%", percentage);
+    fflush(stdout);
+}
 
 void hexDump(const char *desc, void *addr, int len, int offset)
 {
@@ -99,6 +123,7 @@ std::string B64Encode(unsigned char const *data, int dataSize)
     unsigned char arr6[4] = { 0 };
     unsigned char arr8[3] = { 0 };
     int i = 0;
+    int fullDataSize = dataSize;
 
     while (dataSize--)
     {
@@ -114,6 +139,10 @@ std::string B64Encode(unsigned char const *data, int dataSize)
             }
             i = 0;
         }
+        
+        float prct = ((float)(fullDataSize - dataSize) / (float)fullDataSize) * 100.0;
+        
+        progress_draw((int)prct);
     }
 
     if (i)
@@ -137,6 +166,9 @@ std::string B64Encode(unsigned char const *data, int dataSize)
         }
     }
     
+    progress_draw(100);
+    fprintf(stdout, "\n");
+    
     return result;
 }
 
@@ -144,6 +176,7 @@ std::string B64Decode(unsigned char const *data, int dataSize)
 {
     assert(data);
     std::string result;
+    int fullDataSize = dataSize;
     unsigned char arr6[4] = { 0 };
     unsigned char arr8[3] = { 0 };
     int i = 0;
@@ -177,7 +210,11 @@ std::string B64Decode(unsigned char const *data, int dataSize)
                 result += arr8[j];
             }
             i = 0;
-        }        
+        }
+        
+        float prct = ((float)(fullDataSize - dataSize) / (float)fullDataSize) * 100.0;
+        
+        progress_draw((int)prct);
     }
     
     if (i)
@@ -199,6 +236,9 @@ std::string B64Decode(unsigned char const *data, int dataSize)
             result += arr8[j];
         }
     }
+    
+    progress_draw(100);
+    fprintf(stdout, "\n");
     
     return result;
 }

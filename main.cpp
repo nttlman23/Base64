@@ -9,74 +9,11 @@
 #include <assert.h>
 #include <unistd.h>
 
-#define BLACK_SQUARE        "▪"
-#define WHITE_SQUARE        "▫"
+
 
 #define TIMEOUT             100000
 
-void progress_draw(int percentage)
-{
-    int blsq = percentage / 5;
-    int whtsq = 20 - blsq;
-    int i;
-    
-    fprintf(stdout, "\rLoading ");
-    
-    for (i = 0;i < blsq;i++)
-    {
-        fprintf(stdout, "%s", BLACK_SQUARE);
-    }
-    
-    for (i = 0;i < whtsq;i++)
-    {
-        fprintf(stdout, "%s", WHITE_SQUARE);
-    }
-    
-    fprintf(stdout, " %d%%", percentage);
-    fflush(stdout);
-}
 
-void hexDump(char *desc, void *addr, int len, int offset) 
-{
-    assert(addr);
-    int i;
-    unsigned char buff[17];
-    unsigned char *pc = (unsigned char*)addr;
-    
-    if (desc != NULL)
-    {
-        printf ("%s:\n", desc);
-    }
-    
-    for (i = 0; i < len; i++)
-    {
-        if ((i % 16) == 0)
-        {
-            if (i != 0)
-            {
-                printf("  %s\n", buff);
-            }
-            printf("%08x ", i + (offset * 0x200));
-        }
-        printf(" %02x", pc[i]);
-        if ((pc[i] < 0x20) || (pc[i] > 0x7e))
-        {
-            buff[i % 16] = '.';
-        }
-        else
-        {
-            buff[i % 16] = pc[i];
-        }
-        
-        buff[(i % 16) + 1] = '\0';
-    }
-    while ((i % 16) != 0)
-    {
-        printf("   ");
-        i++;
-    }
-    printf("  %s\n", buff);
-}
 
 void release_res(std::fstream &ifile, std::fstream &ofile, char *buffer)
 {
@@ -149,7 +86,7 @@ char *read_from_stdin(int &data_size)
 
 char *read_from_file(std::fstream &in, int &data_size)
 {
-    std::string data_str;    
+    std::string data_str;
     char *buffer = NULL;
     data_size = 0;
     
@@ -161,11 +98,7 @@ char *read_from_file(std::fstream &in, int &data_size)
     
     in.read(buffer, data_size);
     
-    if (in)
-    {
-        std::cout << "all characters read successfully." << std::endl;
-    }
-    else
+    if (!in)
     {
         std::cout << "error: only " << in.gcount() <<
                                 " could be read" << std::endl;
@@ -174,6 +107,15 @@ char *read_from_file(std::fstream &in, int &data_size)
     }
     
     return buffer;
+}
+
+void usage()
+{
+    std::cout << "b64_test [-d] [-i FILE] [-o FILE]" << std::endl;
+    std::cout << "-d, --decode - decode data" << std::endl;
+    std::cout << "-i, --input - encode or decode FILE. With no FILE read standart input" << std::endl;
+    std::cout << "-o, --output - result FILE. With no FILE result will be written to a standart output" << std::endl;
+    std::cout << "-h, --help - printf this message" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -202,6 +144,7 @@ int main(int argc, char** argv)
         {"input",       required_argument,  NULL, 'i'},
         {"output",      required_argument,  NULL, 'o'},
         {"decode",      required_argument,  NULL, 'd'},
+        {"help",        no_argument,        NULL, 'h'},
         {NULL,          0,                  NULL,  0}
     };
     
@@ -244,6 +187,10 @@ int main(int argc, char** argv)
                 decode = 1;
                 break;
             }
+            case 'h':
+            {
+                usage();
+            }
         }
     }
     
@@ -255,6 +202,8 @@ int main(int argc, char** argv)
     {
         buffer = read_from_file(in, data_size);
     }
+    
+//     hexDump("\nData", (void *)buffer, data_size, 0);
     
     std::string dest_str;
     
@@ -269,11 +218,12 @@ int main(int argc, char** argv)
     
     if (out.is_open())
     {
+//         hexDump("\nResult", (void *)dest_str.c_str(), dest_str.length(), 0);
         out.write (dest_str.c_str(), dest_str.length());
     }
     else
     {
-        hexDump("Result", (void *)dest_str.c_str(), dest_str.length(), 0);
+//         hexDump("\nResult", (void *)dest_str.c_str(), dest_str.length(), 0);
         std::cout << std::endl << "Result string: " << dest_str.c_str() << std::endl;
     }
     
