@@ -179,15 +179,13 @@ char *read_from_file(std::fstream &in, int &data_size)
 int main(int argc, char** argv)
 {
     
-    for (int i = 0;i <= 100;i++)
-    {
-        progress_draw(i);
-        usleep(TIMEOUT);
-    }
+//     for (int i = 0;i <= 100;i++)
+//     {
+//         progress_draw(i);
+//         usleep(TIMEOUT);
+//     }
     
-    fprintf(stdout, "\n\n( ͡° ͜ʖ ͡°)\n\n");
-    return 0;
-    
+//     fprintf(stdout, "\n\n( ͡° ͜ʖ ͡°)\n\n");
     
     char *buffer = NULL;
     int stdin_io = 1;
