@@ -9,19 +9,32 @@
 #include <assert.h>
 #include <unistd.h>
 
-#define LOADING_0           "Loading… ▫▫▫▫▫▫▫▫▫▫ 0%"
-#define LOADING_10          "Loading… ▪▫▫▫▫▫▫▫▫▫ 10%"
-#define LOADING_20          "Loading… ▪▪▫▫▫▫▫▫▫▫ 20%"
-#define LOADING_30          "Loading… ▪▪▪▫▫▫▫▫▫▫ 30%"
-#define LOADING_40          "Loading… ▪▪▪▪▫▫▫▫▫▫ 40%"
-#define LOADING_50          "Loading… ▪▪▪▪▪▫▫▫▫▫ 50%"
-#define LOADING_60          "Loading… ▪▪▪▪▪▪▫▫▫▫ 60%"
-#define LOADING_70          "Loading… ▪▪▪▪▪▪▪▫▫▫ 70%"
-#define LOADING_80          "Loading… ▪▪▪▪▪▪▪▪▫▫ 80%"
-#define LOADING_90          "Loading… ▪▪▪▪▪▪▪▪▪▫ 90%"
-#define LOADING_100         "Loading… ▪▪▪▪▪▪▪▪▪▪ 100%"
+#define BLACK_SQUARE        "▪"
+#define WHITE_SQUARE        "▫"
 
-#define TIMEOUT             200000
+#define TIMEOUT             100000
+
+void progress_draw(int percentage)
+{
+    int blsq = percentage / 5;
+    int whtsq = 20 - blsq;
+    int i;
+    
+    fprintf(stdout, "\rLoading ");
+    
+    for (i = 0;i < blsq;i++)
+    {
+        fprintf(stdout, "%s", BLACK_SQUARE);
+    }
+    
+    for (i = 0;i < whtsq;i++)
+    {
+        fprintf(stdout, "%s", WHITE_SQUARE);
+    }
+    
+    fprintf(stdout, " %d%%", percentage);
+    fflush(stdout);
+}
 
 void hexDump(char *desc, void *addr, int len, int offset) 
 {
@@ -165,50 +178,13 @@ char *read_from_file(std::fstream &in, int &data_size)
 
 int main(int argc, char** argv)
 {
-    fprintf(stdout, "%s", LOADING_0);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_10);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_20);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_30);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_40);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_50);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_60);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_70);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_80);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_90);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
-    fprintf(stdout, "%s", LOADING_100);
-    fflush(stdout);
-    usleep(TIMEOUT);
-    fprintf(stdout, "\r");
+    
+    for (int i = 0;i <= 100;i++)
+    {
+        progress_draw(i);
+        usleep(TIMEOUT);
+    }
+    
     fprintf(stdout, "\n\n( ͡° ͜ʖ ͡°)\n\n");
     return 0;
     
