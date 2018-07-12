@@ -30,9 +30,39 @@ static void progress_draw(int percentage)
         fprintf(stdout, "%s", WHITE_SQUARE);
     }
             
-    fprintf(stdout, " %d%%", percentage);
+    fprintf(stdout, " %d %%", percentage);
     fflush(stdout);
 }
+
+// static void progress_draw(int percentage)
+// {
+//     int blsq = percentage / 5;
+//     int whtsq = 20 - blsq;
+//     int i;
+//     char buffer[100] = { 0 };
+//     int len = 0;
+//     
+//     sprintf(buffer + len, "\rProcessing ");
+//     
+//     len = strlen(buffer);
+//     
+//     for (i = 0;i < blsq;i++)
+//     {
+//         sprintf(buffer + len, "%s", BLACK_SQUARE);
+//         len++;
+//     }
+//     
+//     for (i = 0;i < whtsq;i++)
+//     {
+//         sprintf(buffer + len, "%s", WHITE_SQUARE);
+//         len++;
+//     }
+//     
+//     sprintf(buffer + len, " %d %%", percentage);
+//     
+//     fprintf(stdout, "%s", buffer);
+//     fflush(stdout);
+// }
 
 void hexDump(const char *desc, void *addr, int len, int offset)
 {
