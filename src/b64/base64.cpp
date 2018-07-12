@@ -5,10 +5,12 @@
 #include <assert.h>
 
 // QUJDRA==
+const uint8_t base64_chars[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789+/";
 
-static const std::string base64_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-void hexDump(char *desc, void *addr, int len, int offset) 
+void hexDump(const char *desc, void *addr, int len, int offset)
 {
     assert(addr);
     int i;
@@ -50,6 +52,31 @@ void hexDump(char *desc, void *addr, int len, int offset)
     printf("  %s\n", buff);
 }
 
+static inline unsigned char b64_lookup(unsigned char c)
+{
+    if(c >='A' && c <='Z')
+    {
+        return c - 'A';
+    }
+    if(c >='a' && c <='z')
+    {
+        return c - 71;
+    }
+    if(c >='0' && c <='9')
+    {
+        return c + 4;
+    }
+    if(c == '+')
+    {
+        return 62;
+    }
+    if(c == '/')
+    {
+        return 63;
+    }
+    return 255;
+}
+
 void cnvrt826(unsigned char *arr8, unsigned char *arr6)
 {
     arr6[0] = ((arr8[0] & 0xfc) >> 2);
@@ -60,9 +87,9 @@ void cnvrt826(unsigned char *arr8, unsigned char *arr6)
 
 void cnvrt628(unsigned char *arr6, unsigned char *arr8)
 {
-    arr8[0] = ((arr6[0] & 0x3f) << 2) + ((arr6[1] & 0x30) >> 4);
-    arr8[1] = ((arr6[1] & 0x0f) << 4) + ((arr6[2] & 0x3c) >> 2);
-    arr8[2] = ((arr6[2] & 0x03) << 6) + (arr6[3] & 0x3f);
+    arr8[0] = (arr6[0] << 2) + ((arr6[1] & 0x30) >> 4);
+    arr8[1] = ((arr6[1] & 0xf) << 4) + ((arr6[2] & 0x3c) >> 2);
+    arr8[2] = ((arr6[2] & 0x3) << 6) + arr6[3];
 }
 
 std::string B64Encode(unsigned char const *data, int dataSize)
@@ -116,25 +143,31 @@ std::string B64Encode(unsigned char const *data, int dataSize)
 std::string B64Decode(unsigned char const *data, int dataSize)
 {
     assert(data);
-    hexDump("data", (void*)data, dataSize, 0);
     std::string result;
     unsigned char arr6[4] = { 0 };
     unsigned char arr8[3] = { 0 };
     int i = 0;
     int j;
-    while((dataSize--) && (*data) != '=')
+
+    while(dataSize--)
     {
-        if (*data == 0x0a)
+        if ((*data) == '=')
+        {
+            break;
+        }
+        if (b64_lookup(*data) == 255)
         {
             data++;
+            continue;
         }
+            
         arr6[i++] = *(data++);
         
         if (i == 4)
         {
             for ( j = 0; j < 4; j++)
             {
-                arr6[j] = base64_chars.find(arr6[j]);
+                arr6[j] = b64_lookup(arr6[j]);
             }
             
             cnvrt628(arr6, arr8);
@@ -144,27 +177,29 @@ std::string B64Decode(unsigned char const *data, int dataSize)
                 result += arr8[j];
             }
             i = 0;
-        }
-        
+        }        
     }
     
     if (i)
     {
-        for ( j = 0; j < i - 1; j++)
+        for (j = i; j < 4;j++)
         {
-            arr6[j] = base64_chars.find(arr6[j]);
+            arr6[j] = '\0';
         }
-            
+        
+        for ( j = 0; j < 4; j++)
+        {
+            arr6[j] = b64_lookup(arr6[j]);
+        }
+
         cnvrt628(arr6, arr8);
-           
+        
         for ( j = 0; j < i - 1; j++)
         {
             result += arr8[j];
         }
     }
     
-    hexDump("result", (void*)result.c_str(), result.length(), 0);
-
     return result;
 }
 

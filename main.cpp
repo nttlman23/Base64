@@ -273,7 +273,8 @@ int main(int argc, char** argv)
     }
     else
     {
-        std::cout << std::endl << "Result: " << dest_str.c_str() << std::endl;
+        hexDump("Result", (void *)dest_str.c_str(), dest_str.length(), 0);
+        std::cout << std::endl << "Result string: " << dest_str.c_str() << std::endl;
     }
     
     release_res(in, out, buffer);
