@@ -11,58 +11,48 @@ const uint8_t base64_chars[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"
         "0123456789+/";
-        
+
 static void progress_draw(int percentage)
 {
     int blsq = percentage / 5;
     int whtsq = 20 - blsq;
     int i;
+    char buffer[100] = { 0 };
+    int len = 0;
     
-    fprintf(stdout, "\rProcessing ");
+    sprintf(buffer + len, "\rProcessing ");
+
+    len = 12;
     
     for (i = 0;i < blsq;i++)
     {
-        fprintf(stdout, "%s", BLACK_SQUARE);
+        sprintf(buffer + len, "%s", (char *)BLACK_SQUARE);
+        len += 3;
     }
-            
+    
     for (i = 0;i < whtsq;i++)
     {
-        fprintf(stdout, "%s", WHITE_SQUARE);
+        sprintf(buffer + len, "%s", (char *)WHITE_SQUARE);
+        len += 3;
     }
-            
-    fprintf(stdout, " %d %%", percentage);
-    fflush(stdout);
+    
+    sprintf(buffer + len, " %d %%", percentage);
+    
+    fprintf(stdout, "%s", buffer);
+//     fflush(stdout);
 }
 
-// static void progress_draw(int percentage)
-// {
-//     int blsq = percentage / 5;
-//     int whtsq = 20 - blsq;
-//     int i;
-//     char buffer[100] = { 0 };
-//     int len = 0;
-//     
-//     sprintf(buffer + len, "\rProcessing ");
-//     
-//     len = strlen(buffer);
-//     
-//     for (i = 0;i < blsq;i++)
-//     {
-//         sprintf(buffer + len, "%s", BLACK_SQUARE);
-//         len++;
-//     }
-//     
-//     for (i = 0;i < whtsq;i++)
-//     {
-//         sprintf(buffer + len, "%s", WHITE_SQUARE);
-//         len++;
-//     }
-//     
-//     sprintf(buffer + len, " %d %%", percentage);
-//     
-//     fprintf(stdout, "%s", buffer);
-//     fflush(stdout);
-// }
+static void show_cursor(bool show)
+{
+    if (show)
+    {
+        fputs("\e[?25h", stdout); /* show the cursor */
+    }
+    else
+    {
+        fputs("\e[?25l", stdout); /* hide the cursor */
+    }
+}
 
 void hexDump(const char *desc, void *addr, int len, int offset)
 {
@@ -149,6 +139,7 @@ void cnvrt628(unsigned char *arr6, unsigned char *arr8)
 std::string B64Encode(unsigned char const *data, int dataSize)
 {
     assert(data);
+    show_cursor(false);
     std::string result = "";
     unsigned char arr6[4] = { 0 };
     unsigned char arr8[3] = { 0 };
@@ -198,6 +189,7 @@ std::string B64Encode(unsigned char const *data, int dataSize)
     
     progress_draw(100);
     fprintf(stdout, "\n");
+    show_cursor(true);
     
     return result;
 }
@@ -205,6 +197,7 @@ std::string B64Encode(unsigned char const *data, int dataSize)
 std::string B64Decode(unsigned char const *data, int dataSize)
 {
     assert(data);
+    show_cursor(false);
     std::string result;
     int fullDataSize = dataSize;
     unsigned char arr6[4] = { 0 };
@@ -269,6 +262,7 @@ std::string B64Decode(unsigned char const *data, int dataSize)
     
     progress_draw(100);
     fprintf(stdout, "\n");
+    show_cursor(true);
     
     return result;
 }

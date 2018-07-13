@@ -8,12 +8,9 @@
 #include <fstream>
 #include <assert.h>
 #include <unistd.h>
-
-
+#include <sys/time.h>
 
 #define TIMEOUT             100000
-
-
 
 void release_res(std::fstream &ifile, std::fstream &ofile, char *buffer)
 {
@@ -120,15 +117,6 @@ void usage()
 
 int main(int argc, char** argv)
 {
-    
-//     for (int i = 0;i <= 100;i++)
-//     {
-//         progress_draw(i);
-//         usleep(TIMEOUT);
-//     }
-    
-//     fprintf(stdout, "\n\n( ͡° ͜ʖ ͡°)\n\n");
-    
     char *buffer = NULL;
     int stdin_io = 1;
     int stdout_io = 1;
@@ -136,6 +124,9 @@ int main(int argc, char** argv)
     
     std::fstream in;
     std::fstream out;
+    
+    struct timeval start, end;
+    long mtime, seconds, useconds;
     
     int decode = 0;
     
@@ -203,9 +194,9 @@ int main(int argc, char** argv)
         buffer = read_from_file(in, data_size);
     }
     
-//     hexDump("\nData", (void *)buffer, data_size, 0);
-    
     std::string dest_str;
+    
+    gettimeofday(&start, NULL);
     
     if (decode)
     {
@@ -216,14 +207,22 @@ int main(int argc, char** argv)
         dest_str = B64Encode((unsigned char const *)buffer, data_size);
     }
     
+    gettimeofday(&end, NULL);
+    
+    seconds  = end.tv_sec  - start.tv_sec;
+    
+    useconds = end.tv_usec - start.tv_usec;
+    
+    mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+    
+    fprintf(stdout, "Time: %ld ms\n", mtime);
+    
     if (out.is_open())
     {
-//         hexDump("\nResult", (void *)dest_str.c_str(), dest_str.length(), 0);
         out.write (dest_str.c_str(), dest_str.length());
     }
     else
     {
-//         hexDump("\nResult", (void *)dest_str.c_str(), dest_str.length(), 0);
         std::cout << std::endl << "Result string: " << dest_str.c_str() << std::endl;
     }
     
